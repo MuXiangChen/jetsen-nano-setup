@@ -70,6 +70,11 @@ export PATH=/usr/local/cuda-10.2/bin${PATH:+:${PATH}}
 
 nvcc --version
 
+blackscreen driver error fix
+https://askubuntu.com/questions/808816/black-screen-after-installing-cuda-8-0rc-from-nvidia-and-unable-to-enter-tty
+
+https://blog.j2i.net/2019/12/25/tipfixing-black-screen-after-installing-cuda-sdk-on-linux/
+
 # open3d
 
 sudo apt-get update -y
