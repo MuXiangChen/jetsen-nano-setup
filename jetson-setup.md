@@ -40,6 +40,7 @@ sudo make install
 B-4. Test your new cmake version.
 
 cmake --version
+sd
 
 
 # cuda
