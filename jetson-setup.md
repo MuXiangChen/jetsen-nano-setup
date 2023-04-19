@@ -56,15 +56,18 @@ sudo apt-key add /var/cuda-repo-ubuntu1804-11-3-local/7fa2af80.pub
 sudo apt-get update
 sudo apt-get -y install cuda
 
-sudo apt-get -o dpkg::Options::="--force-overwrite" install --fix-broken
+<!-- sudo apt-get -o dpkg::Options::="--force-overwrite" install --fix-broken -->
+
+sudo apt-get -f upgrade
 
 dpkg -l | grep cuda
 
 cd /usr/local/cuda
 cuda/      cuda-10/   cuda-10.2/ cuda-11/   cuda-11.0/ cuda-11.3/
 
-export PATH=/usr/local/cuda-12.0/bin${PATH:+:${PATH}}
+export PATH=/usr/local/cuda-10.2/bin${PATH:+:${PATH}}
 
+nvcc --version
 
 # open3d
 
