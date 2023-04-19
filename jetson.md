@@ -107,13 +107,67 @@ https://github.com/Fndroid/clash_for_windows_pkg/releases
 - open3d setup
 1. util/install_deps_ubuntu.sh
 2. install CUDA https://jfrog.com/connect/post/installing-cuda-on-nvidia-jetson-nano/
-3. sudo apt-get -o Dpkg::Options::="--force-overwrite" install --fix-broken
-4. 
 
-1. python3 -m pip install open3d
-1. git clone https://github.com/isl-org/Open3D.git
-2. util/install_deps_ubuntu.sh
-3. cmake -DBUILD_GUI=ON -DBUILD_CUDA_MODULE=ON -DBUILD_LIBREALSENSE=ON ..
+https://dev.to/ajeetraina/install-cuda-on-jetson-nano-2b06
+
+export PATH=/usr/local/cuda-12.0/bin${PATH:+:${PATH}}
+3. update cmake
+
+sudo apt remove --purge cmake
+sudo apt autoremove
+
+Downloading cmake3.14 from ‘Download | CMake 467’
+https://cmake.org/download/
+tar zxcf cmake-3.14.0.tar.gz
+cd cmake-3.14.0
+sudo ./bootstrap //20 mimutes
+sudo make
+sudo make install
+cmake --version //return the version of cmake
+
+./bootstrap --system-curl
+make -j3
+sudo make install
+
+4. 
+3. cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_LIBREALSENSE=ON -DBUILD_CUDA_MODULE=ON -DBUILD_GUI=ON -DBUILD_TENSORFLOW_OPS=OFF -DBUILD_PYTORCH_OPS=OFF -DBUILD_UNIT_TESTS=ON -DCMAKE_INSTALL_PREFIX=~/open3d_install -DPYTHON_EXECUTABLE=$(which python3) ..
+4. make -j$(nproc)
+5. 
+
+
+
+sudo apt-get update -y
+sudo apt-get install -y apt-utils build-essential git cmake
+sudo apt-get install -y python3 python3-dev python3-pip
+sudo apt-get install -y xorg-dev libglu1-mesa-dev
+sudo apt-get install -y libblas-dev liblapack-dev liblapacke-dev
+sudo apt-get install -y libsdl2-dev libc++-7-dev libc++abi-7-dev libxi-dev
+sudo apt-get install -y clang-7
+
+
+sudo apt update
+sudo apt install build-essential libtool autoconf unzip wget
+
+Downloading cmake3.14 from ‘Download | CMake 467’
+https://cmake.org/download/
+
+A-1. Uninstall the default version provided by Ubuntu's package manager and configuration by using:
+
+sudo apt remove --purge --auto-remove cmake
+
+B-2. Go to the official CMake webpage, then download and extract the latest version. Update the version and build variables in the following command to get the desired version:
+
+B-3. Install the extracted source by running:
+
+./bootstrap
+make -j$(nproc)
+sudo make install
+
+B-4. Test your new cmake version.
+
+$ cmake --version
+
+
 
 https://zenn.dev/ijiwarunahello/scraps/fee9925b443478
 
