@@ -1,4 +1,22 @@
 
+# custum jetson nano image
+
+# remove apt update source
+
+sudo nano /etc/apt/sources.list
+
+# remove app
+
+https://www.howtogeek.com/229699/how-to-uninstall-software-using-the-command-line-in-linux/
+
+dpkg -l | grep qq
+sudo apt-get remove linuxqq
+
+
+# system monitor
+sudo apt-get install gnome-system-monitor
+
+
 # clash
 
 https://github.com/Fndroid/clash_for_windows_pkg/releases
@@ -19,141 +37,128 @@ sudo dpkg -i <file>.deb
 
 # cmake
 
-sudo apt update
-sudo apt install build-essential libtool autoconf unzip wget
-
-Downloading cmake3.14 from ‘Download | CMake 467’
-https://cmake.org/download/
-
-A-1. Uninstall the default version provided by Ubuntu's package manager and configuration by using:
+https://askubuntu.com/questions/355565/how-do-i-install-the-latest-version-of-cmake-from-the-command-line
 
 sudo apt remove --purge --auto-remove cmake
 
-B-2. Go to the official CMake webpage, then download and extract the latest version. Update the version and build variables in the following command to get the desired version:
+sudo apt update && \
+sudo apt install -y software-properties-common lsb-release && \
+sudo apt clean all
 
-B-3. Install the extracted source by running:
+wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
 
-./bootstrap
-make -j$(nproc)
-sudo make install
+sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
 
-B-4. Test your new cmake version.
+sudo apt update
+sudo apt install kitware-archive-keyring
+sudo rm /etc/apt/trusted.gpg.d/kitware.gpg
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6AF7F09730B3F0A4
+sudo apt update
+sudo apt install cmake
 
 cmake --version
-sd
 
+# realsense
+
+sudo apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
+
+sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo bionic main" -u
+
+sudo apt-get install librealsense2-utils
+sudo apt-get install librealsense2-dev
+
+g++ -std=c++11 filename.cpp -lrealsense2
 
 # cuda
 
-https://jfrog.com/connect/post/installing-cuda-on-nvidia-jetson-nano/
-
-https://dev.to/ajeetraina/install-cuda-on-jetson-nano-2b06
-
-wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/sbsa/cuda-ubuntu1804.pin
-sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600
-wget https://developer.download.nvidia.com/compute/cuda/11.3.1/local_installers/cuda-repo-ubuntu1804-11-3-local_11.3.1-465.19.01-1_arm64.deb
-sudo dpkg -i cuda-repo-ubuntu1804-11-3-local_11.3.1-465.19.01-1_arm64.deb
-sudo apt-key add /var/cuda-repo-ubuntu1804-11-3-local/7fa2af80.pub
-sudo apt-get update
-sudo apt-get -y install cuda
-
-<!-- sudo apt-get -o dpkg::Options::="--force-overwrite" install --fix-broken -->
-
-sudo apt-get -f upgrade
-
-dpkg -l | grep cuda
-
-cd /usr/local/cuda
-cuda/      cuda-10/   cuda-10.2/ cuda-11/   cuda-11.0/ cuda-11.3/
-
-export PATH=/usr/local/cuda-10.2/bin${PATH:+:${PATH}}
-
-nvcc --version
-
-blackscreen driver error fix
-https://askubuntu.com/questions/808816/black-screen-after-installing-cuda-8-0rc-from-nvidia-and-unable-to-enter-tty
-
-https://blog.j2i.net/2019/12/25/tipfixing-black-screen-after-installing-cuda-sdk-on-linux/
-
-# open3d
-
-sudo apt-get update -y
-sudo apt-get install -y apt-utils build-essential git cmake
-sudo apt-get install -y python3 python3-dev python3-pip
-sudo apt-get install -y xorg-dev libglu1-mesa-dev
-sudo apt-get install -y libblas-dev liblapack-dev liblapacke-dev
-sudo apt-get install -y libsdl2-dev libc++-7-dev libc++abi-7-dev libxi-dev
-sudo apt-get install -y clang-7
-
-git clone https://github.com/intel-isl/Open3d.git
-
-util/install_deps_ubuntu.sh
-
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_LIBREALSENSE=ON -DBUILD_CUDA_MODULE=ON -DBUILD_GUI=ON -DBUILD_TENSORFLOW_OPS=OFF -DBUILD_PYTORCH_OPS=OFF -DBUILD_UNIT_TESTS=ON -DCMAKE_INSTALL_PREFIX=~/open3d_install -DPYTHON_EXECUTABLE=$(which python3) ..
-
-make -j$(nproc)
-
+export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64\
+                         ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
 # python multiple version
 
 https://cloudbytes.dev/snippets/upgrade-python-to-latest-version-on-ubuntu-linux
 
-# waveshare
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
 
-7. install python 3.7 for waveshare UPS
-8. update-alternative select 3.7 manual
-9. install python header files
+sudo apt install python3.10
+sudo apt install python3.7
+
 sudo apt-get install python-dev
 sudo apt-get install python3-dev
 sudo apt-get install python3.7-dev
-10. fix turminal cant open
-ctrl+alt+F3
+sudo apt-get install python3.10-dev
+
+python3 --version
+
 sudo vim /usr/bin/gnome-terminal
-Change #!/usr/bin/python3 to #!/usr/bin/python3.6.
-11. chagne python
+change #!/usr/bin/python3 to #!/usr/bin/python3.6
+
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 3
+
 sudo update-alternatives --config python3
-12. install pip
-https://linuxize.com/post/how-to-install-pip-on-ubuntu-18.04/
-13. update setuptools
-http://rolk.github.io/2018/10/25/setuptools
-python3 -m pip install --upgrade setuptools
-sudo apt-get install python3-setuptools
-sudo apt-get install python-setuptools
-python3 -m pip install --upgrade pip setuptools wheel
+
+- Fix pip and disutils errors
+
+sudo apt remove --purge python3-apt
+sudo apt autoclean
+sudo apt install python3-apt
+sudo apt install python3.10-distutils
+sudo apt install curl
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+sudo python3.10 get-pip.py
+pip --version
+sudo apt install python3.10-venv
+
+If you have oh-my-zsh installed, you can avoid typing out python3 by running
+
+echo "alias py=/usr/bin/python3" >> ~/.zshrc
+echo "alias python=/usr/bin/python3" >> ~/.zshrc
+Now you can run your files with py or python.
+
+# path environment
+
+sudo vim /etc/environment
+
+# open3d
+
+https://www.hackster.io/devshank/jetscan-16a521
+
+pythone version 3.7 3.8 3.9 3.10
+
+sudo apt-get update -y
+
+sudo apt-get install -y apt-utils build-essential git xorg-dev libglu1-mesa-dev libblas-dev liblapack-dev liblapacke-dev libsdl2-dev libc++-7-dev libc++abi-7-dev libxi-dev clang-7
+
+git clone https://github.com/intel-isl/Open3d.git
+
+util/install_deps_ubuntu.sh
+
+mkdir build
+cd build
+
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_LIBREALSENSE=ON -DBUILD_CUDA_MODULE=ON -DBUILD_GUI=ON -DBUILD_TENSORFLOW_OPS=OFF -DBUILD_PYTORCH_OPS=OFF -DBUILD_UNIT_TESTS=ON -DCMAKE_INSTALL_PREFIX=~/open3d_install -DPYTHON_EXECUTABLE=$(which python3) ..
+
+make -j$(nproc)
+
+make install
+make install-pip-package
+make python-package
+make pip-package
+python -c "import open3d"
+
+
+# waveshare
+
+sudo pip3 uninstall Pillow
+sudo -H pip3 install Pillow
+sudo -H pip3 install smbus
+
 1. DOCS  https://www.waveshare.com/wiki/UPS_Power_Module
 2. git clone https://github.com/waveshare/UPS-Power-Module
 cd UPS-Power-Module
 sudo ./install.sh
 3. manual install
-
-set -e
-
-password=$1
-
-- enable i2c permissions
-echo $password | sudo -S usermod -aG i2c $USER
-
-- install pip and some apt dependencies
-echo $password | sudo -S apt-get update
-echo $password | sudo -S apt install -y python3-pip python3-pil python3-smbus
-echo $password | sudo -S pip3 install flask
-
-- install ups_display
-echo $password | sudo -S python3 setup.py install
-
-- install UPS_Power_Module display service
-python3 -m ups_display.create_display_service
-echo $password | sudo -S mv ups_display.service /etc/systemd/system/ups_display.service
-echo $password | sudo -S systemctl enable ups_display
-echo $password | sudo -S systemctl start ups_display
-
-!!!!!!!!!!!!!!! sudo -H pip3 install flask
-!!!!!!!!!!!!!!! pip install flask
-!!!!!!!!!!!!!!! systemctl status ups_display
-!!!!!!!!!!!!!!! sudo -H pip3 install Pillow
-!!!!!!!!!!!!!!! sudo -H pip3 install markupsafe==1.0
-!!!!!!!!!!!!!!! sudo -H pip3 install smbus
-
-move ups_display folder to home
-
-finished !!!!!!
