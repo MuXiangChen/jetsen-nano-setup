@@ -1,6 +1,14 @@
 
 # custum jetson nano image
 
+# install specific package version
+
+https://itsfoss.com/apt-install-specific-version/
+
+apt list --all-versions package_name
+sudo apt install package_name=package_version
+
+
 # remove apt update source
 
 sudo nano /etc/apt/sources.list
@@ -131,7 +139,7 @@ pythone version 3.7 3.8 3.9 3.10
 
 sudo apt-get update -y
 
-sudo apt-get install -y apt-utils build-essential git xorg-dev libglu1-mesa-dev libblas-dev liblapack-dev liblapacke-dev libsdl2-dev libc++-7-dev libc++abi-7-dev libxi-dev clang-7
+sudo apt-get install -y ccache apt-utils build-essential git xorg-dev libglu1-mesa-dev libblas-dev liblapack-dev liblapacke-dev libsdl2-dev libc++-7-dev libc++abi-7-dev libxi-dev clang-7
 
 git clone https://github.com/intel-isl/Open3d.git
 
@@ -140,7 +148,105 @@ util/install_deps_ubuntu.sh
 mkdir build
 cd build
 
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_LIBREALSENSE=ON -DBUILD_CUDA_MODULE=ON -DBUILD_GUI=ON -DBUILD_TENSORFLOW_OPS=OFF -DBUILD_PYTORCH_OPS=OFF -DBUILD_UNIT_TESTS=ON -DCMAKE_INSTALL_PREFIX=~/open3d_install -DPYTHON_EXECUTABLE=$(which python3) ..
+## python path problem
+import sys
+print(sys.path)
+
+## 100 errors detected in the compilation of "/tmp/tmpxft_00000289_00000000-6_ParallelFor.cpp1.ii".
+https://github.com/isl-org/Open3D/issues/4516
+ caused by eigen using wrong version of cuda
+ https://www.hackster.io/devshank/jetscan-16a521
+- uninstall eigen3
+sudo apt-get uninstall eigen3
+- install eigen3 ver - 3.3.7
+https://apolo-docs.readthedocs.io/en/latest/software/scientific_libraries/eigen/eigen-3.3.7/index.html
+
+$ wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz
+$ tar -xzvf eigen-3.3.7.tar.gz
+
+$ cd eigen-3.3.7
+$ mkdir build
+$ cd build
+
+$ cmake ..
+
+$ sudo make -j$(nproc) install
+
+add this line
+cmake -DUSE_SYSTEM_EIGEN3=ON..
+
+## cpp/open3d/core/CMakeFiles/core.dir/build.make:999: recipe for target 'cpp/open3d/core/CMakeFiles/core.dir/kernel/BinaryEWCUDA.cu.o' failed
+[ 45%] Building CXX object cpp/open3d/core/CMakeFiles/core.dir/linalg/InverseCUDA.cpp.o
+Killed
+cpp/open3d/core/CMakeFiles/core.dir/build.make:999: recipe for target 'cpp/open3d/core/CMakeFiles/core.dir/kernel/BinaryEWCUDA.cu.o' failed
+
+by chatgpt:
+
+The error message you provided suggests that the build process was terminated unexpectedly during the compilation of a CUDA file named "BinaryEWCUDA.cu".
+
+The message "Killed" usually indicates that the process was terminated by the Linux kernel due to lack of system resources, such as memory or CPU time.
+
+Here are some steps you can take to resolve the issue:
+
+1. Check if there is enough free memory and CPU time available on the system. You can use the free and top commands to check the current memory usage and CPU usage, respectively. If the system is low on memory, you may need to close other memory-intensive applications or increase the amount of available memory on the system. If the system is low on CPU time, you may need to wait for other processes to complete or reduce the number of running processes.
+2. Try reducing the number of parallel build jobs by specifying a lower value for the -j option of the make command. For example, you can try running make -j2 instead of make -j$(nproc). This will reduce the amount of system resources used by the build process and may prevent the "Killed" error.
+3. Check if the build settings or source code are causing excessive memory usage during the compilation process. This can happen if the code is using large data structures or making frequent allocations. If this is the case, you may need to optimize the code or modify the build settings to reduce memory usage.
+4. If the issue persists, you can try running the build process on a system with more memory or CPU resources.
+Once you have resolved the issue, you can retry the build process.
+
+## freeze problem
+
+memory issue jetson nano only has 4g memory, restart and build again, cmake will continue
+
+or increase swap size
+https://ploi.io/documentation/server/change-swap-size-in-ubuntu
+
+1. Turn off all running swap processes: swapoff -a
+2. Resize swap fallocate -l 1G /swapfile (change 1G to the gigabyte size you want it to be)
+3. CHMOD swap: chmod 600 /swapfile
+4. Make file usable as swap mkswap /swapfile
+5. Active the swap file swapon /swapfile
+
+To verify your swap size run the following command and you will see the swap size: free -m
+
+## Open3D/cpp/open3d/geometry/Line3D.h:117:9: error: ‘transform’ was not declared in this scope
+https://github.com/isl-org/Open3D/issues/2487
+
+eigen version problem change the code and fix the problem
+
+-DUSE_SYSTEM_EIGEN3=ON and change this->transform(t) to this->Transform(t)
+
+## fmt error
+https://github.com/isl-org/Open3D/issues/5205
+https://github.com/isl-org/Open3D/pull/5303
+could you check -DUSE_SYSTEM_FMT=ON configuration? I do see build error when libfmt being shared library. cf #5622 (comment)
+
+This PR updates the fmt::formatter specialization as documented in the fmtlib documentation for fmtlib >= 7, and fixes the build errors with fmtlib >= 8.
+
+-DUSE_SYSTEM_FMT=ON
+
+
+- manual install fmt latest version
+
+https://fmt.dev/latest/usage.html#building-the-library
+
+git clone https://github.com/fmtlib/fmt.git
+git checkout 7.1.3
+mkdir build 
+cd build
+cmake -DBUILD_SHARED_LIBS=TRUE -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE ..  
+sudo make install
+
+wrong version
+
+- uninstall fmt
+
+cat install_manifest.txt | sudo xargs rm
+cat install_manifest.txt | xargs -L1 dirname | sudo xargs rmdir -p
+
+
+## final cmake command
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_LIBREALSENSE=ON -DBUILD_CUDA_MODULE=ON -DBUILD_GUI=ON -DBUILD_TENSORFLOW_OPS=OFF -DBUILD_PYTORCH_OPS=OFF -DBUILD_UNIT_TESTS=ON -DCMAKE_INSTALL_PREFIX=~/open3d_install -DPYTHON_EXECUTABLE=$(which python3) -DPYTHON_LIBRARY=/usr/lib/python3.10 -DPYTHON_INCLUDE_DIR=/usr/include/python3.10 -DPYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3.10 -DUSE_SYSTEM_EIGEN3=ON -DUSE_SYSTEM_FMT=ON ..
 
 make -j$(nproc)
 
@@ -149,6 +255,8 @@ make install-pip-package
 make python-package
 make pip-package
 python -c "import open3d"
+
+
 
 
 # waveshare
