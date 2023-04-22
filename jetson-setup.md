@@ -79,9 +79,9 @@ g++ -std=c++11 filename.cpp -lrealsense2
 
 # cuda
 
+export CUDA_HOME=/usr/local/cuda/${PATH:+:${PATH}}
 export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}
-export LD_LIBRARY_PATH=/usr/local/cuda/lib64\
-                         ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
 # python multiple version
 
@@ -141,7 +141,7 @@ sudo apt-get update -y
 
 sudo apt-get install -y ccache apt-utils build-essential git xorg-dev libglu1-mesa-dev libblas-dev liblapack-dev liblapacke-dev libsdl2-dev libc++-7-dev libc++abi-7-dev libxi-dev clang-7
 
-git clone https://github.com/intel-isl/Open3d.git
+git clone https://github.com/intel-isl/Open3D.git
 
 util/install_deps_ubuntu.sh
 
