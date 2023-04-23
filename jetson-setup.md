@@ -1,29 +1,35 @@
 
-# custum jetson nano image
+# setup nano
 
-# install specific package version
+- download card image:
+https://developer.nvidia.com/jetson-nano-sd-card-image
 
-https://itsfoss.com/apt-install-specific-version/
+- download SD card formatter:
+https://www.sdcard.org/downloads/formatter_4/eula_windows/
 
-apt list --all-versions package_name
-sudo apt install package_name=package_version
+- download flash tool:
+https://www.balena.io/etcher
 
+# increase memory
 
-# remove apt update source
+memory issue jetson nano only has 4g memory, restart and build again, cmake will continue
 
-sudo nano /etc/apt/sources.list
+or increase swap size
+https://ploi.io/documentation/server/change-swap-size-in-ubuntu
 
-# remove app
+1. Turn off all running swap processes: swapoff -a
+2. Resize swap fallocate -l 1G /swapfile (change 1G to the gigabyte size you want it to be)
+3. CHMOD swap: chmod 600 /swapfile
+4. Make file usable as swap mkswap /swapfile
+5. Active the swap file swapon /swapfile
 
-https://www.howtogeek.com/229699/how-to-uninstall-software-using-the-command-line-in-linux/
+sudo swapoff -a
+sudo fallocate -l 10G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
 
-dpkg -l | grep qq
-sudo apt-get remove linuxqq
-
-
-# system monitor
-sudo apt-get install gnome-system-monitor
-
+To verify your swap size run the following command and you will see the swap size: free -m
 
 # clash
 
@@ -85,6 +91,10 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PAT
 
 # python multiple version
 
+python 3.6 is pre-installed
+python 3.10 for Open3D v0.17.0
+python 3.7 for UPS-Power-Module
+
 https://cloudbytes.dev/snippets/upgrade-python-to-latest-version-on-ubuntu-linux
 
 sudo add-apt-repository ppa:deadsnakes/ppa
@@ -127,11 +137,45 @@ echo "alias py=/usr/bin/python3" >> ~/.zshrc
 echo "alias python=/usr/bin/python3" >> ~/.zshrc
 Now you can run your files with py or python.
 
-# path environment
+# path environment check
 
 sudo vim /etc/environment
 
 # open3d
+
+git clone https://github.com/intel-isl/Open3D.git
+
+util/install_deps_ubuntu.sh
+
+mkdir build
+cd build
+
+cmake -DBUILD_LIBREALSENSE=ON -DBUILD_CUDA_MODULE=ON -DBUILD_GUI=ON ..
+
+make -j$(nproc)
+
+make install
+make install-pip-package
+make python-package
+make pip-package
+python -c "import open3d"
+
+## opsource project
+https://www.hackster.io/devshank/jetscan-16a521
+
+## if can't find CUDA
+add cuda to path
+
+## if can't download sth
+use VPN
+
+## freeze problem
+need large memory
+set swap memory
+
+## previous encontered problems
+
+/*
 
 https://www.hackster.io/devshank/jetscan-16a521
 
@@ -148,11 +192,11 @@ util/install_deps_ubuntu.sh
 mkdir build
 cd build
 
-## python path problem
+### python path problem
 import sys
 print(sys.path)
 
-## 100 errors detected in the compilation of "/tmp/tmpxft_00000289_00000000-6_ParallelFor.cpp1.ii".
+### 100 errors detected in the compilation of "/tmp/tmpxft_00000289_00000000-6_ParallelFor.cpp1.ii".
 https://github.com/isl-org/Open3D/issues/4516
  caused by eigen using wrong version of cuda
  https://www.hackster.io/devshank/jetscan-16a521
@@ -175,7 +219,7 @@ $ sudo make -j$(nproc) install
 add this line
 cmake -DUSE_SYSTEM_EIGEN3=ON..
 
-## cpp/open3d/core/CMakeFiles/core.dir/build.make:999: recipe for target 'cpp/open3d/core/CMakeFiles/core.dir/kernel/BinaryEWCUDA.cu.o' failed
+### cpp/open3d/core/CMakeFiles/core.dir/build.make:999: recipe for target 'cpp/open3d/core/CMakeFiles/core.dir/kernel/BinaryEWCUDA.cu.o' failed
 [ 45%] Building CXX object cpp/open3d/core/CMakeFiles/core.dir/linalg/InverseCUDA.cpp.o
 Killed
 cpp/open3d/core/CMakeFiles/core.dir/build.make:999: recipe for target 'cpp/open3d/core/CMakeFiles/core.dir/kernel/BinaryEWCUDA.cu.o' failed
@@ -194,7 +238,7 @@ Here are some steps you can take to resolve the issue:
 4. If the issue persists, you can try running the build process on a system with more memory or CPU resources.
 Once you have resolved the issue, you can retry the build process.
 
-## freeze problem
+### freeze problem
 
 memory issue jetson nano only has 4g memory, restart and build again, cmake will continue
 
@@ -216,7 +260,7 @@ eigen version problem change the code and fix the problem
 
 -DUSE_SYSTEM_EIGEN3=ON and change this->transform(t) to this->Transform(t)
 
-## fmt error
+### fmt error
 https://github.com/isl-org/Open3D/issues/5205
 https://github.com/isl-org/Open3D/pull/5303
 could you check -DUSE_SYSTEM_FMT=ON configuration? I do see build error when libfmt being shared library. cf #5622 (comment)
@@ -231,7 +275,7 @@ This PR updates the fmt::formatter specialization as documented in the fmtlib do
 https://fmt.dev/latest/usage.html#building-the-library
 
 git clone https://github.com/fmtlib/fmt.git
-git checkout 7.1.3
+git checkout 8.0.1
 mkdir build 
 cd build
 cmake -DBUILD_SHARED_LIBS=TRUE -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE ..  
@@ -245,8 +289,13 @@ cat install_manifest.txt | sudo xargs rm
 cat install_manifest.txt | xargs -L1 dirname | sudo xargs rmdir -p
 
 
-## final cmake command
+### final cmake command
+
 cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_LIBREALSENSE=ON -DBUILD_CUDA_MODULE=ON -DBUILD_GUI=ON -DBUILD_TENSORFLOW_OPS=OFF -DBUILD_PYTORCH_OPS=OFF -DBUILD_UNIT_TESTS=ON -DCMAKE_INSTALL_PREFIX=~/open3d_install -DPYTHON_EXECUTABLE=$(which python3) -DPYTHON_LIBRARY=/usr/lib/python3.10 -DPYTHON_INCLUDE_DIR=/usr/include/python3.10 -DPYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3.10 -DUSE_SYSTEM_EIGEN3=ON -DUSE_SYSTEM_FMT=ON ..
+
+still won't work
+
+cmake ..
 
 make -j$(nproc)
 
@@ -258,8 +307,7 @@ python -c "import open3d"
 
 
 
-
-# waveshare
+# waveshare UPS-Power-Module with OLED display
 
 sudo pip3 uninstall Pillow
 sudo -H pip3 install Pillow
@@ -270,3 +318,29 @@ sudo -H pip3 install smbus
 cd UPS-Power-Module
 sudo ./install.sh
 3. manual install
+
+
+# custum jetson nano image
+
+# install specific package version
+
+https://itsfoss.com/apt-install-specific-version/
+
+apt list --all-versions package_name
+sudo apt install package_name=package_version
+
+
+# remove apt update source
+
+sudo nano /etc/apt/sources.list
+
+# remove app
+
+https://www.howtogeek.com/229699/how-to-uninstall-software-using-the-command-line-in-linux/
+
+dpkg -l | grep qq
+sudo apt-get remove linuxqq
+
+
+# system monitor
+sudo apt-get install gnome-system-monitor
