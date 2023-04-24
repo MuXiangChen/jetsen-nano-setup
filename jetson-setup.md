@@ -24,7 +24,7 @@ https://ploi.io/documentation/server/change-swap-size-in-ubuntu
 5. Active the swap file swapon /swapfile
 
 sudo swapoff -a
-sudo fallocate -l 10G /swapfile
+sudo fallocate -l 30G /swapfile
 sudo chmod 600 /swapfile
 sudo mkswap /swapfile
 sudo swapon /swapfile
@@ -36,6 +36,13 @@ To verify your swap size run the following command and you will see the swap siz
 https://github.com/Fndroid/clash_for_windows_pkg/releases
 ./cfw launch
 
+terminal proxy
+
+export http_proxy='http://127.0.0.1:7890'    
+export https_proxy='http://127.0.0.1:7890'
+
+unset http_proxy
+unset https_proxy
 
 # vscode
 
@@ -66,8 +73,10 @@ sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) 
 sudo apt update
 sudo apt install kitware-archive-keyring
 sudo rm /etc/apt/trusted.gpg.d/kitware.gpg
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6AF7F09730B3F0A4
+
 sudo apt update
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6AF7F09730B3F0A4
+
 sudo apt install cmake
 
 cmake --version
@@ -145,7 +154,7 @@ sudo vim /etc/environment
 
 git clone https://github.com/intel-isl/Open3D.git
 
-util/install_deps_ubuntu.sh
+sudo Open3D/util/install_deps_ubuntu.sh
 
 mkdir build
 cd build
@@ -321,6 +330,50 @@ sudo ./install.sh
 
 
 # custum jetson nano image
+
+https://askubuntu.com/questions/227924/sd-card-cloning-using-the-dd-command
+
+Insert the original SD card and check the name of the device (usually mmcblkX or sdcX):
+
+sudo fdisk -l
+You might see:
+
+Device         Boot   Start      End  Sectors  Size Id Type
+/dev/mmcblk0p1 *       2048  2099199  2097152    1G  c W95 FAT32 (LBA)
+/dev/mmcblk0p2      2099200 31116287 29017088 13.9G 83 Linux
+In my case the SD card is /dev/mmcblk0 (the *p1 and *p2 are the partitions).
+
+Now you have to unmount the device:
+
+sudo umount /dev/mmcblk0
+Now to create an image of the device:
+
+sudo dd if=/dev/mmcblk0 of=~/sd-card-copy.img bs=1M status=progress
+This will take a while.
+
+Once it's finished, insert the empty SD card. If the device is different (USB or other type of SD card reader) verify its name and be sure to unmount it:
+
+sudo fdisk -l
+sudo umount /dev/mmcblk0
+Write the image to the device:
+
+sudo dd if=~/sd-card-copy.img of=/dev/mmcblk0 bs=1M status=progress
+The write operation is much slower than before.
+
+https://raspberrytips.com/create-image-sd-card/
+
+– On Windows, use Win32 Disk Imager.
+https://sourceforge.net/projects/win32diskimager/
+
+1. Insert your SD card in your computer.
+
+2. Find the partition letter corresponding to your SD card
+
+3. Open Win 32 Disk Imager.
+
+4. Start by choosing an image location and name for your image:
+
+
 
 # install specific package version
 
