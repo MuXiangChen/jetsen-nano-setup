@@ -197,7 +197,18 @@ sudo -H python3 -m pip install matplotlib==3.4.3
 
 ValueError: setting an array element with a sequence. The requested array would exceed the maximum number of dimension of 1.
 
+(.venv) PS C:\Users\uaena\Desktop\Open3d\Open3D> python
+Python 3.10.5 (tags/v3.10.5:f377153, Jun  6 2022, 16:14:13) [MSC v.1929 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import numpy
+>>> numpy.version.version
+'1.23.5'
+>>> import cv2
+>>> cv2.__version__
+'4.6.0'
+>>>
 
+this is the version that can run !!!
 
 
 ## opsource project
