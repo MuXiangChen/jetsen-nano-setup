@@ -150,16 +150,23 @@ Now you can run your files with py or python.
 
 sudo vim /etc/environment
 
+# opencv-python
+
+sudo -H python3 -m pip install opencv-python
+
 # open3d
 
 git clone https://github.com/intel-isl/Open3D.git
 
 sudo Open3D/util/install_deps_ubuntu.sh
 
-mkdir build
-cd build
+- activate venv
+jasmine@jasmine-desktop:~/Open3D$ python3 -m venv .venv
+jasmine@jasmine-desktop:~/Open3D$ source .venv/bin/activate
 
-cmake -DBUILD_LIBREALSENSE=ON -DBUILD_CUDA_MODULE=ON -DBUILD_GUI=ON ..
+mkdir build && cd build
+
+cmake -DBUILD_LIBREALSENSE=ON -DBUILD_CUDA_MODULE=ON -DBUILD_GUI=ON -DBUILD_AZURE_KINECT=ON ..
 
 make -j$(nproc)
 
@@ -168,6 +175,30 @@ make install-pip-package
 make python-package
 make pip-package
 python -c "import open3d"
+
+## opencv error
+
+from matplotlib import pyplot as plt  # for visualizing feature matching
+  File "/usr/lib/python3/dist-packages/matplotlib/__init__.py", line 107, in <module>
+    from collections import MutableMapping
+ImportError: cannot import name 'MutableMapping' from 'collections' (/usr/lib/python3.10/collections/__init__.py)
+
+fix: 
+
+If you don't want to modify the matplotlib library code, you can try using an older version of the library that is compatible with your version of Python.
+
+For example, if you are using Python 3.10, you can try installing an older version of matplotlib that does not use MutableMapping.
+
+To do this, you can use the following command in your terminal or command prompt:
+
+sudo -H python3 -m pip install matplotlib==3.4.3
+
+## joblib problem
+
+ValueError: setting an array element with a sequence. The requested array would exceed the maximum number of dimension of 1.
+
+
+
 
 ## opsource project
 https://www.hackster.io/devshank/jetscan-16a521
